@@ -87,29 +87,32 @@ print(responsible_keys)
 # Question 2.2
 
 def lookup(i, key, dht=dht):
-    # Peer i's information
-    peer = dht[i]
-    peer_key = peer['key']
-    pred_key = peer['pred']
+    current_peer = dht[i]
+    peer_key = current_peer['key']
     
-    # Base Case: If peer i is responsible for the key
-    if pred_key < key <= peer_key or (pred_key > peer_key and (key > pred_key or key <= peer_key)):
-        return [i]  # Return route with current peer i
+    # To build a recursion we need a base case
+    # this is where the loop should end, otherwise we end up with infinite loop
+    #if pred_key < key <= peer_key or (pred_key > peer_key and (key > pred_key or key <= peer_key)):
+    if isincharge(dht[i], key):
+        return [i] # Why would i add '[]', because otherwise you will sum up numbers (look in the 3rd return)
     
-    # If there's only one peer (i.e., it is responsible for all keys), return the current peer
-    if peer['succ'] == peer['key'] and peer['pred'] == peer['key']:
-        return [i]  # Peer 1 is the only one responsible for everything
+    successor = current_peer['succ']
+    predecessor = current_peer['pred']
+    # Added after exo 3, to handle the unique situation where dht contains only one peer responsible for everything
+    if successor == peer_key and predecessor == peer_key:
+        return [i]
     
+    finger_table = current_peer['finger']
     # Case 2: Use the finger table to find the closest peer
-    for finger in reversed(peer['finger']): # the reversed function is very important to our search
+    for finger in reversed(finger_table): # the reversed function is very important to our search
                                             # if we dont reverse the order = > This could lead to inefficient routing with unnecessary intermediate hops.
-                                            # I noticed when i didnt use it that the path was long and it is not prioritiing
+                                            # I noticed when i didnt use it that the path was long and it is not prioritizing
                                             # the largest valid finger 
         if finger > peer_key and finger <= key:
             return [i] + lookup(finger, key, dht)
     
     # If no finger is valid, move to the successor
-    return [i] + lookup(peer['succ'], key, dht)
+    return [i] + lookup(successor, key, dht)
 
-result = lookup(8, 56, dht)
+result = lookup(56, 2, dht)
 print(result)
