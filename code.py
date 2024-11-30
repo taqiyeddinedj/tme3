@@ -55,13 +55,15 @@ print({peer: {'key': peer, 'succ': info['succ'], 'pred': info['pred'], 'finger':
 
 # Question 2.1
 
+#Question 2.1 : 
+
 def isincharge(dht_i, key):
     # It is important to understand this:
     # A peer is responsible for a key 'K' if:
     # The key K lies in the interval between the predecessor of p and P itself
     # We can express this as:
     # if predecessor(p) < K <= P, then P is responsible for K.
-    
+
     current_key = dht_i['key']      #38
     predecessor_key = dht_i['pred'] # from one to 64
 
@@ -69,7 +71,6 @@ def isincharge(dht_i, key):
         return predecessor_key <= key < current_key  # return true, if the valuated condition is correct else return false
     else:
         return key >= predecessor_key or key < current_key
-
 
 i = 1; k = 56
 value = isincharge(dht[i], k)
@@ -81,3 +82,34 @@ print(value)
 i = 38
 responsible_keys = [k for k in range(Nmax) if isincharge(dht[i], k)]
 print(responsible_keys)
+
+
+# Question 2.2
+
+def lookup(i, key, dht=dht):
+    # Peer i's information
+    peer = dht[i]
+    peer_key = peer['key']
+    pred_key = peer['pred']
+    
+    # Base Case: If peer i is responsible for the key
+    if pred_key < key <= peer_key or (pred_key > peer_key and (key > pred_key or key <= peer_key)):
+        return [i]  # Return route with current peer i
+    
+    # If there's only one peer (i.e., it is responsible for all keys), return the current peer
+    if peer['succ'] == peer['key'] and peer['pred'] == peer['key']:
+        return [i]  # Peer 1 is the only one responsible for everything
+    
+    # Case 2: Use the finger table to find the closest peer
+    for finger in reversed(peer['finger']): # the reversed function is very important to our search
+                                            # if we dont reverse the order = > This could lead to inefficient routing with unnecessary intermediate hops.
+                                            # I noticed when i didnt use it that the path was long and it is not prioritiing
+                                            # the largest valid finger 
+        if finger > peer_key and finger <= key:
+            return [i] + lookup(finger, key, dht)
+    
+    # If no finger is valid, move to the successor
+    return [i] + lookup(peer['succ'], key, dht)
+
+result = lookup(8, 56, dht)
+print(result)
