@@ -116,3 +116,35 @@ def lookup(i, key, dht=dht):
 
 result = lookup(56, 2, dht)
 print(result)
+
+new_dht = {1: {'key': 1, 'succ': 1, 'pred': 1, 'finger': []}}
+result = lookup(1, 42, dht=new_dht)
+print(result)
+
+# Question 3
+def build_finger(i, candidates):
+    # Initialisation de la table des doigts
+    finger_table = []
+
+    # Trier les candidats
+    sorted_candidates = sorted(candidates)
+
+    # Déterminer la taille maximale du finger table (log2(Nmax))
+    m = int(math.log2(Nmax))  # Nmax doit être défini (par exemple, 64)
+
+    # Construction de la table des doigts
+    for k in range(m):
+        target = (i + 2**k) % Nmax  # Calcul du point cible pour l'entrée k
+        for candidate in sorted_candidates:
+            if candidate >= target and candidate != i:  # Exclure i (le nœud lui-même)
+                finger_table.append(candidate)
+                break
+        else:
+            # Si aucun candidat ne correspond, prendre le premier (cycle de l'anneau)
+            if sorted_candidates[0] != i:  # Exclure i s'il est le premier
+                finger_table.append(sorted_candidates[0])
+
+    # Retourner la table des doigts sans doublons et respectant l'ordre
+    return sorted(set(finger_table), key=finger_table.index)
+
+
