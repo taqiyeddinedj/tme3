@@ -177,4 +177,33 @@ print(new_dht)
 
 
 
+def remove_peer(i, dht):
+    # Check if the peer exists in the DHT
+    if i not in dht:
+        print(f"Peer {i} is not in the DHT.")
+        return dht
+    
+    # Dynamically reconstruct added_peers from the keys in dht, excluding the peer to be removed
+    added_peers = sorted([peer for peer in dht.keys() if peer != i])
+    
+    # If no peers remain after removal, reset to a minimal DHT
+    if not added_peers:
+        return {1: {'key': 1, 'succ': 1, 'pred': 1, 'finger': []}}
+    
+    # Create a new DHT dictionary without the removed peer
+    new_dht = {}
+    
+    # Reconstruct the DHT without the removed peer
+    for peer in added_peers:
+        new_dht[peer] = {
+            'key': peer,
+            'succ': successor(peer, added_peers),
+            'pred': predecessor(peer, added_peers),
+            'finger': build_finger(peer, added_peers)
+        }
+    
+    return new_dht
 
+result = remove_peer(8, new_dht)
+print("\nRemoving peer 8")
+print(result)
