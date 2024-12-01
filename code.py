@@ -1,5 +1,5 @@
 import math
-
+from random import sample
 
 Nmax = 64 
 peers = [1, 8, 14, 21, 32, 38, 42, 48, 51, 56] 
@@ -146,5 +146,35 @@ def build_finger(i, candidates):
 
     # Retourner la table des doigts sans doublons et respectant l'ordre
     return sorted(set(finger_table), key=finger_table.index)
+
+
+
+
+def insert_peer(i, dht):
+    # Dynamically reconstruct added_peers from the keys in dht
+    added_peers = sorted(dht.keys())  # Sorting why ?, we want to keep the consistency
+
+    if i not in added_peers:
+        added_peers.append(i)
+        added_peers = sorted(added_peers)  # Keep the list sorted after adding
+        for peer in added_peers:
+            dht[peer] = {
+                'key': peer,
+                'succ': successor(peer, added_peers),
+                'pred': predecessor(peer, added_peers),
+                'finger': build_finger(peer, added_peers)
+            }
+    else:
+        print(f"Peer {i} has already been added to the DHT.")
+    
+    return dht
+            
+new_dht = {1: {'key': 1, 'succ': 1, 'pred': 1, 'finger': []}}
+peers = [1, 8, 14, 21, 32, 38, 42, 48, 51, 56] 
+for peer in peers:
+    insert_peer(peer, new_dht)
+print(new_dht)
+
+
 
 
