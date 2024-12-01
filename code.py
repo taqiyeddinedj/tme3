@@ -1,5 +1,6 @@
 import math
 from random import sample
+import random
 
 Nmax = 64 
 peers = [1, 8, 14, 21, 32, 38, 42, 48, 51, 56] 
@@ -207,3 +208,13 @@ def remove_peer(i, dht):
 result = remove_peer(8, new_dht)
 print("\nRemoving peer 8")
 print(result)
+
+
+# Exercise 4
+# Question 4.1
+Nmax = 2**32  # Key space for 32-bit keys
+random_peers = random.sample(range(1, Nmax), 1000)
+for peer in random_peers:
+    insert_peer(peer, new_dht)
+# Verify the size of the DHT
+print(f"Number of peers in the DHT: {len(new_dht)}")
